@@ -1,11 +1,3 @@
-from fastapi import FastAPI, Depends
-from fastapi import Response, Cookie, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse
-from fastapi.responses import RedirectResponse as redirect
-from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-from typing import Union
 import json
 import requests
 import urllib.parse
@@ -20,6 +12,20 @@ max_api_wait_time = 3
 max_time = 10
 url = requests.get(r'https://raw.githubusercontent.com/mochidukiyukimi/yuki-youtube-instance/main/instance.txt').text.rstrip()
 version = "1.0"
+
+def get_info(request):
+    global version
+    # バージョン、nullのRENDER_EXTERNAL_URL、リクエストヘッダ、ルーター情報を返す
+    return json.dumps([version, None, str(request.scope["headers"]), str(request.scope['router'])[39:-2]])
+
+from fastapi import FastAPI, Depends
+from fastapi import Response, Cookie, Request
+from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import RedirectResponse as redirect
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from typing import Union
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -42,7 +48,7 @@ def view_bbs_info(request: Request):
 
 @cache(seconds=5)
 def bbsapi_cached(verify, channel, from_param):
-    return requests.get(f"{url}bbs/api?t={urllib.parse.quote(str(int(time.time()*1000)))}&verify={urllib.parse.quote(verify)}&channel={urllib.parse.quote(channel)}&from={from_param}", cookies={"yuki": "True"}).text
+    return requests.get(f"{url}bbs/api?t={urllib.parse.quote(str(int(time.time() * 1000)))}&verify={urllib.parse.quote(verify)}&channel={urllib.parse.quote(channel)}&from={from_param}", cookies={"yuki": "True"}).text
 
 @app.get("/bbs/api", response_class=HTMLResponse)
 def view_bbs_api(request: Request, t: str, channel: Union[str, None] = "main", verify: Union[str, None] = "false", from_param: int = 0):

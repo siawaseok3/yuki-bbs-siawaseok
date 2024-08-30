@@ -11,13 +11,12 @@ from cache import cache
 max_api_wait_time = 3
 max_time = 10
 url = requests.get(r'https://raw.githubusercontent.com/mochidukiyukimi/yuki-youtube-instance/main/instance.txt').text.rstrip()
-version = "1.0"
+version = "1.1"
 
 def get_info(request):
     global version
-    #return json.dumps()
-    return json.dumps([version,os.environ.get('RENDER_EXTERNAL_URL'),str(request.scope["headers"]),str(request.scope['router'])[39:-2]])
-    
+    # バージョン、nullのRENDER_EXTERNAL_URL、リクエストヘッダ、ルーター情報を返す
+    return json.dumps([version, None, str(request.scope["headers"]), str(request.scope['router'])[39:-2]])
 
 from fastapi import FastAPI, Depends
 from fastapi import Response, Cookie, Request
@@ -43,17 +42,17 @@ def view_bbs(request: Request, name: Union[str, None] = "", seed: Union[str, Non
     return template("bbs.html", {"request": request})
 
 @app.get("/bbs/info", response_class=HTMLResponse)
-def view_bbs_info(request: Request):
+def view_bbs(request: Request, name: Union[str, None] = "", seed: Union[str, None] = "", channel: Union[str, None] = "main", verify: Union[str, None] = "false", yuki: Union[str] = Cookie(None)):
     res = HTMLResponse(requests.get(f"{url}bbs/info").text)
     return res
 
 @cache(seconds=5)
-def bbsapi_cached(verify, channel, from_param):
-    return requests.get(f"{url}bbs/api?t={urllib.parse.quote(str(int(time.time() * 1000)))}&verify={urllib.parse.quote(verify)}&channel={urllib.parse.quote(channel)}&from={from_param}", cookies={"yuki": "True"}).text
+def bbsapi_cached(verify, channel):
+    return requests.get(f"{url}bbs/api?t={urllib.parse.quote(str(int(time.time() * 1000)))}&verify={urllib.parse.quote(verify)}&channel={urllib.parse.quote(channel)}", cookies={"yuki": "True"}).text
 
 @app.get("/bbs/api", response_class=HTMLResponse)
-def view_bbs_api(request: Request, t: str, channel: Union[str, None] = "main", verify: Union[str, None] = "false", from_param: int = 0):
-    return bbsapi_cached(verify, channel, from_param)
+def view_bbs(request: Request, t: str, channel: Union[str, None] = "main", verify: Union[str, None] = "false"):
+    return bbsapi_cached(verify, channel)
 
 @app.get("/bbs/result")
 def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[str, None] = "", channel: Union[str, None] = "main", verify: Union[str, None] = "false"):
@@ -73,6 +72,6 @@ def view_commonds(request: Request, yuki: Union[str] = Cookie(None)):
     return how_cached()
 
 @app.get("/load_instance")
-def load_instance():
+def home():
     global url
     url = requests.get(r'https://raw.githubusercontent.com/mochidukiyukimi/yuki-youtube-instance/main/instance.txt').text.rstrip()

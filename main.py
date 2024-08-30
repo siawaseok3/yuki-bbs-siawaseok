@@ -11,12 +11,14 @@ from cache import cache
 max_api_wait_time = 3
 max_time = 10
 url = requests.get(r'https://raw.githubusercontent.com/mochidukiyukimi/yuki-youtube-instance/main/instance.txt').text.rstrip()
-version = "1.1"
+version = "1.0"
 
 def get_info(request):
     global version
-    # バージョン、nullのRENDER_EXTERNAL_URL、リクエストヘッダ、ルーター情報を返す
-    return json.dumps([version, None, str(request.scope["headers"]), str(request.scope['router'])[39:-2]])
+    #return json.dumps()
+    return json.dumps([version,os.environ.get('RENDER_EXTERNAL_URL'),str(request.scope["headers"]),str(request.scope['router'])[39:-2]])
+
+
 
 from fastapi import FastAPI, Depends
 from fastapi import Response, Cookie, Request

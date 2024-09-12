@@ -201,14 +201,32 @@ function sendMessage(name, seed, channel, message) {
 }
 
 // メッセージ送信
-function sendMessageByUser() {
-  var name = $('#name').val();
-  var seed = $('#seed').val();
-  var message = $('#message').val();
-  var channel = $('#channel').val();
-  sendMessage(name, seed, channel, message);
-  $('#message').val("");
+function sendMessage(name, seed, channel, message) {
+  if (name === '' || seed === '' || channel === '') {
+    console.warn('Invalid argument(s).');
+  } else {
+    // メッセージが空の場合に空白を追加
+    if (message === '') {
+      message = ' ';
+    }
+    
+    message = btoa(unescape(encodeURIComponent(message)));
+    
+    $.ajax({
+      type: 'GET',
+      url: '/bbs/result',
+      data: {
+        'name': name,
+        'seed': seed,
+        'message': message,
+        'channel': channel
+      }
+    });
+    
+    console.log(message, btoa(message));
+  }
 }
+
 
 // メッセージ読み込み
 var xhr;

@@ -67,17 +67,37 @@ def bbsapi_cached(verify,channel):
 def view_bbs(request: Request,t: str,channel:Union[str,None]="main",verify: Union[str,None] = "false"):
     # print(fr"{url}bbs/api?t={urllib.parse.quote(t)}&verify={urllib.parse.quote(verify)}&channel={urllib.parse.quote(channel)}")
     return bbsapi_cached(verify,channel)
+    
+import random
+import string
 
 @app.get("/bbs/result")
-def write_bbs(request: Request,name: str = "",message: str = "",seed:Union[str,None] = "",channel:Union[str,None]="main",verify:Union[str,None]="false"):
+def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[str, None] = "", channel: Union[str, None] = "main", verify: Union[str, None] = "false"):
+    # メッセージをbase64デコード
     message = base64.b64decode(message).decode('utf-8')
-    # print(get_info(request))
+
+    # seedが「流し」の場合、ランダムな文字列を追加
+    if seed == "流し":
+        random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        seed += random_string
+
+    # デバッグ用の出力
     print(f"name:{name}, seed:{seed}, channel:{channel}, message:{message}")
-    t = requests.get(fr"{url}bbs/result?name={urllib.parse.quote(name)}&message={urllib.parse.quote(message)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}&info={urllib.parse.quote(get_info(request))}",cookies={"yuki":"True"}, allow_redirects=False)
+
+    # 掲示板APIにリクエストを送信
+    t = requests.get(
+        fr"{url}bbs/result?name={urllib.parse.quote(name)}&message={urllib.parse.quote(message)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}&info={urllib.parse.quote(get_info(request))}",
+        cookies={"yuki": "True"},
+        allow_redirects=False
+    )
+
+    # ステータスコードが307でない場合は結果を表示
     if t.status_code != 307:
         return HTMLResponse(t.text)
-    return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}")
 
+    # ステータスコードが307の場合はリダイレクト
+    return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}")
+    
 @cache(seconds=30)
 def how_cached():
     return requests.get(fr"{url}bbs/how").text

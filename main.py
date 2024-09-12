@@ -76,8 +76,8 @@ def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[s
     # メッセージをbase64デコード
     message = base64.b64decode(message).decode('utf-8')
 
-    # seedが「流し」の場合、ランダムな文字列を追加
-    if seed == "流し":
+    # seedに「流し」が含まれている場合、ランダムな文字列を追加
+    if "流し" in seed:
         random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
         seed += random_string
 
@@ -96,8 +96,8 @@ def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[s
         return HTMLResponse(t.text)
 
     # ステータスコードが307の場合はリダイレクト
-    return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}")
-    
+    return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}") 
+
 @cache(seconds=30)
 def how_cached():
     return requests.get(fr"{url}bbs/how").text

@@ -56,11 +56,11 @@ def view_bbs(request: Request, t: str, channel: Union[str, None] = "main", verif
 
 @app.get("/bbs/result")
 def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[str, None] = "", channel: Union[str, None] = "main", verify: Union[str, None] = "false"):
-    # メッセージが空の場合でも処理できるように
+    # メッセージが空の場合に空白を追加する
     if message:
         message = base64.b64decode(message).decode('utf-8')
     else:
-        message = ""  # 空のメッセージを許可
+        message = " "  # 空のメッセージの場合は空白を送信
 
     # デバッグ用の出力
     print(f"name:{name}, seed:{seed}, channel:{channel}, message:{message}")
@@ -78,10 +78,6 @@ def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[s
 
     # ステータスコードが307の場合は/bbsにリダイレクト
     return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}")
-@cache(seconds=30)
-def how_cached():
-    return requests.get(f"{url}bbs/how").text
-
 @app.get("/bbs/how", response_class=PlainTextResponse)
 def view_commonds(request: Request, yuki: Union[str] = Cookie(None)):
     return how_cached()

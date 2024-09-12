@@ -182,10 +182,15 @@ function toDarkmode() {
   
 // メッセージ送信
 function sendMessage(name, seed, channel, message) {
-  if (name=='' || seed=='' || channel=='' || message=='') {
-    console.warn('Invalid argument(s).')
+  if (name === '' || seed === '' || channel === '') {
+    console.warn('Invalid argument(s).');
   } else {
+    // メッセージの後ろに必ず空白を追加
+    message = message + ' ';
+
+    // メッセージをBase64エンコード
     message = btoa(unescape(encodeURIComponent(message)));
+
     $.ajax({
       type: 'GET',
       url: '/bbs/result',
@@ -196,9 +201,11 @@ function sendMessage(name, seed, channel, message) {
         'channel': channel
       }
     });
-    console.log(message, btoa(message))
+    
+    console.log(message, btoa(message));
   }
 }
+
 
 // メッセージ送信
 function sendMessageByUser() {

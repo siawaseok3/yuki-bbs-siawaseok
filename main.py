@@ -78,9 +78,6 @@ def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[s
 
     # ステータスコードが307の場合は/bbsにリダイレクト
     return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}")
-@app.get("/bbs/how", response_class=PlainTextResponse)
-def view_commonds(request: Request, yuki: Union[str] = Cookie(None)):
-    return how_cached()
 
 @app.get("/load_instance")
 def home():

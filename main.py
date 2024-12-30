@@ -76,8 +76,8 @@ def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[s
     # メッセージをbase64デコード
     message = base64.b64decode(message).decode('utf-8')
 
-    # seedに「流し」が含まれている場合、ランダムな文字列を追加
-    if "流し" in seed:
+    # seedに「℃」が含まれている場合、ランダムな文字列を追加
+    if "℃" in seed:
         random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
         seed += random_string
 

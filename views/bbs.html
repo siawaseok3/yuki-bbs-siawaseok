@@ -20,6 +20,50 @@
     <option value="battle">バトスタ</option>
   </select>
   <label for="verify">スピ限</label>
+  <label>
+        <input type="checkbox" id="toggleButton">
+        Toggle yuki
+    </label>
+
+    <script>
+        // クッキーを設定する関数
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        // チェックボックスのイベントリスナーを設定
+        const toggleButton = document.getElementById("toggleButton");
+        toggleButton.addEventListener("change", () => {
+            if (toggleButton.checked) {
+                setCookie("yuki", "true", 7); // クッキーを7日間有効に設定
+            } else {
+                setCookie("yuki", "false", 7);
+            }
+        });
+
+        // ページロード時にチェックボックスの状態をクッキーから設定
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return null;
+        }
+
+        window.addEventListener("load", () => {
+            const yukiCookie = getCookie("yuki");
+            if (yukiCookie === "true") {
+                toggleButton.checked = true;
+            } else {
+                toggleButton.checked = false;
+            }
+        });
+    </script>
   <input type="checkbox" id="verify" name="verify">
   <br>
   <label for="message"></label>

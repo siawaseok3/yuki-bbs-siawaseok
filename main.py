@@ -98,6 +98,33 @@ def write_bbs(request: Request, name: str = "", message: str = "", seed: Union[s
     # ステータスコードが307の場合はリダイレクト
     return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}") 
 
+
+    # メッセージをbase64デコード
+    message = base64.b64decode(message).decode('utf-8')
+
+    # seedに「+」が含まれている場合、ランダムな文字列を追加
+    if "+" in seed:
+        random_string = ''.join(random.choices(string.ascii_uppercase, k=10))  # A〜Zのランダムな文字列
+        seed += random_string
+
+    # デバッグ用の出力
+    print(f"name:{name}, seed:{seed}, channel:{channel}, message:{message}")
+
+    # 掲示板APIにリクエストを送信
+    t = requests.get(
+        fr"{url}bbs/result?name={urllib.parse.quote(name)}&message={urllib.parse.quote(message)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}&info={urllib.parse.quote(get_info(request))}",
+        cookies={"yuki": "True"},
+        allow_redirects=False
+    )
+
+    # ステータスコードが307でない場合は結果を表示
+    if t.status_code != 307:
+        return HTMLResponse(t.text)
+
+    # ステータスコードが307の場合はリダイレクト
+    return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}")
+
+
 @cache(seconds=30)
 def how_cached():
     return requests.get(fr"{url}bbs/how").text
